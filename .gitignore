@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Secretos y configuración local (NUNCA subir al repositorio)
+.env
+*.env.local
+service-account*.json
+*firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+
+# Flutter / Dart
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins*
+mobile/.packages
+mobile/android/local.properties
+mobile/android/key.properties
+*.jks
+*.keystore
+
+# IDE / SO
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
