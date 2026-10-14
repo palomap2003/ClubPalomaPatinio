@@ -11,7 +11,7 @@ from .utils import ahora_ar
 SWAGGER_TEMPLATE = {
     "swagger": "2.0",
     "info": {
-        "title": "Club Paloma Patiño - API de gestión de espacios deportivos",
+        "title": "ClubPalomaPatinio - API de gestión de espacios deportivos",
         "description": (
             "API REST para reservar espacios deportivos.\n\n"
             "**Autenticación:** el login se hace en Firebase Authentication desde la app. Cada request debe enviar "

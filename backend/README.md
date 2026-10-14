@@ -1,4 +1,4 @@
-# Backend – Club Paloma Patiño
+# Backend – ClubPalomaPatinio
 
 API REST (Flask + PostgreSQL) para la gestión de reservas de espacios deportivos. La autenticación la resuelve
 Firebase Authentication: la app inicia sesión en Firebase y envía el *ID Token* en cada request
