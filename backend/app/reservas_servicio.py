@@ -92,11 +92,16 @@ def crear_reserva(usuario, espacio_id, fecha, hora_inicio, hora_fin, ahora):
     return reserva
 
 
-def cancelar_reserva(usuario, reserva_id, ahora):
+def obtener_reserva(usuario, reserva_id):
     # Si la reserva es de otro usuario se responde 404 (no se revela que existe).
     reserva = db.session.query(Reserva).filter_by(id=reserva_id, usuario_id=usuario.id).first()
     if reserva is None:
         raise ApiError(404, "RESERVA_INEXISTENTE", "La reserva no existe.")
+    return reserva
+
+
+def cancelar_reserva(usuario, reserva_id, ahora):
+    reserva = obtener_reserva(usuario, reserva_id)
     if reserva.estado == ESTADO_CANCELADA:
         raise ApiError(409, "RESERVA_YA_CANCELADA", "La reserva ya estaba cancelada.")
     if reserva.inicio <= ahora:

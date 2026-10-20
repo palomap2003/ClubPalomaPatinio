@@ -115,6 +115,7 @@ def create_app(config=None):
         CLOCK=ahora_ar,  # inyectable para poder testear reglas de "horario futuro"
         TOKEN_VERIFIER=None,  # función token -> {uid, email} | None
         CRON_SECRET=os.environ.get("CRON_SECRET"),
+        PUSH_SENDER=None,  # función (token, titulo, cuerpo, data, ttl_segundos); por defecto FCM
     )
     app.json.sort_keys = False
     if config:
@@ -126,12 +127,17 @@ def create_app(config=None):
         init_firebase()
         app.config["TOKEN_VERIFIER"] = verificar_token_firebase
 
+    if app.config["PUSH_SENDER"] is None:
+        from .push import enviar_push
+
+        app.config["PUSH_SENDER"] = enviar_push
+
     db.init_app(app)
     registrar_manejadores(app)
 
-    from .routes import catalogo, reservas, usuarios
+    from .routes import catalogo, notificaciones, reservas, usuarios
 
-    for modulo in (usuarios, catalogo, reservas):
+    for modulo in (usuarios, catalogo, reservas, notificaciones):
         app.register_blueprint(modulo.bp)
 
     @app.get("/health")

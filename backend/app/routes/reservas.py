@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, g, jsonify, request
 
 from ..auth import con_perfil
 from ..errors import ApiError
-from ..reservas_servicio import cancelar_reserva, crear_reserva, listar_reservas
+from ..reservas_servicio import cancelar_reserva, crear_reserva, listar_reservas, obtener_reserva
 from ..serializadores import reserva_json
 from ..utils import hora_a_int, parsear_fecha
 
@@ -67,6 +67,23 @@ def mis_reservas():
     ahora = current_app.config["CLOCK"]()
     reservas = listar_reservas(g.usuario, request.args.get("tipo", "proximas"), ahora)
     return jsonify([reserva_json(r, ahora) for r in reservas])
+
+
+@bp.get("/<int:reserva_id>")
+@con_perfil
+def detalle(reserva_id):
+    """Detalle de una reserva propia (es la pantalla a la que lleva la notificación push).
+    ---
+    tags: [Reservas]
+    security: [{Bearer: []}]
+    parameters:
+      - {in: path, name: reserva_id, type: integer, required: true}
+    responses:
+      200: {description: Reserva, schema: {$ref: '#/definitions/Reserva'}}
+      401: {description: Sin token o token inválido, schema: {$ref: '#/definitions/Error'}}
+      404: {description: La reserva no existe (o es de otro usuario), schema: {$ref: '#/definitions/Error'}}
+    """
+    return jsonify(reserva_json(obtener_reserva(g.usuario, reserva_id), current_app.config["CLOCK"]()))
 
 
 @bp.delete("/<int:reserva_id>")

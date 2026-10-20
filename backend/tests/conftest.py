@@ -21,10 +21,31 @@ def reloj():
     return {"ahora": AHORA}
 
 
+class PushFalso:
+    """Reemplaza a FCM en los tests: registra los envíos y permite simular fallas."""
+
+    def __init__(self):
+        self.enviados = []
+        self.intentos = 0
+        self.fallas = []  # excepciones a lanzar, una por intento, antes de tener éxito
+
+    def __call__(self, token, titulo, cuerpo, data, ttl_segundos):
+        self.intentos += 1
+        if self.fallas:
+            raise self.fallas.pop(0)
+        self.enviados.append({"token": token, "titulo": titulo, "cuerpo": cuerpo, "data": data, "ttl": ttl_segundos})
+
+
 @pytest.fixture()
-def app(reloj):
+def push():
+    return PushFalso()
+
+
+@pytest.fixture()
+def app(reloj, push):
     app = create_app(
         {
+            "PUSH_SENDER": push,
             "TESTING": True,
             # Por defecto SQLite en memoria; con TEST_DATABASE_URL se prueba contra PostgreSQL real.
             "SQLALCHEMY_DATABASE_URI": os.environ.get("TEST_DATABASE_URL", "sqlite://"),

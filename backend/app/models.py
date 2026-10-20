@@ -125,10 +125,10 @@ class Reserva(db.Model):
     precio_total = db.Column(db.Numeric(10, 2), nullable=False)  # se congela al reservar
     creada_en = db.Column(db.DateTime, nullable=False, default=utcnow)
     cancelada_en = db.Column(db.DateTime)
-    recordatorio_enviado = db.Column(db.Boolean, nullable=False, default=False)
 
     usuario = db.relationship("Usuario", back_populates="reservas")
     espacio = db.relationship("Espacio", back_populates="reservas")
+    notificaciones = db.relationship("Notificacion", back_populates="reserva", cascade="all, delete-orphan")
 
     @property
     def inicio(self):
@@ -137,3 +137,23 @@ class Reserva(db.Model):
     @property
     def fin(self):
         return datetime.combine(self.fecha, time.min) + timedelta(hours=self.hora_fin)
+
+
+TIPO_RECORDATORIO_24H = "recordatorio_24h"
+TIPO_RECORDATORIO_1H = "recordatorio_1h"
+
+
+class Notificacion(db.Model):
+    """Registro de cada recordatorio procesado. La restricción única (reserva, tipo) garantiza que un mismo
+    recordatorio no se envíe dos veces. `resultado`: enviada | sin_token | token_invalido | error."""
+
+    __tablename__ = "notificaciones"
+    __table_args__ = (db.UniqueConstraint("reserva_id", "tipo", name="uq_notificacion_reserva_tipo"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    reserva_id = db.Column(db.Integer, db.ForeignKey("reservas.id"), nullable=False)
+    tipo = db.Column(db.String(20), nullable=False)
+    resultado = db.Column(db.String(20), nullable=False)
+    enviada_en = db.Column(db.DateTime, nullable=False, default=utcnow)
+
+    reserva = db.relationship("Reserva", back_populates="notificaciones")

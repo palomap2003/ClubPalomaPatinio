@@ -6,6 +6,7 @@ Base de datos relacional (PostgreSQL). Las contraseñas **no** se almacenan: las
 erDiagram
     USUARIOS ||--o{ RESERVAS : realiza
     ESPACIOS ||--o{ RESERVAS : "es reservado en"
+    RESERVAS ||--o{ NOTIFICACIONES : "genera"
     SEDES ||--o{ ESPACIOS : contiene
     DEPORTES ||--o{ TIPOS_ESPACIO : "tiene variantes"
     TIPOS_ESPACIO ||--o{ ESPACIOS : clasifica
@@ -62,7 +63,13 @@ erDiagram
         decimal precio_total "se congela al reservar"
         datetime creada_en
         datetime cancelada_en
-        bool recordatorio_enviado
+    }
+    NOTIFICACIONES {
+        int id PK
+        int reserva_id FK
+        string tipo "recordatorio_24h | recordatorio_1h"
+        string resultado "enviada | sin_token | token_invalido | error"
+        datetime enviada_en
     }
 ```
 
@@ -75,6 +82,7 @@ erDiagram
 | Tipo de espacio – Espacio | 1 a N | Cada espacio tiene un tipo (y por él, un deporte). |
 | Usuario – Reserva | 1 a N | Un usuario puede tener muchas reservas. |
 | Espacio – Reserva | 1 a N | Un espacio se reserva muchas veces, nunca en horarios superpuestos. |
+| Reserva – Notificación | 1 a N | Cada recordatorio (24 h y 1 h) queda registrado una sola vez por reserva. |
 
 ## Restricciones e integridad
 
@@ -82,4 +90,5 @@ erDiagram
 - `sedes`: `0 <= hora_apertura < hora_cierre <= 24`.
 - `espacios`: único por (`sede_id`, `tipo_espacio_id`, `numero`) y `nombre` único. El nombre se genera automáticamente, p. ej. `Moron_Rivadavia_Futbol_F5_1`.
 - `reservas`: `0 <= hora_inicio < hora_fin <= 24` (duración mínima de 1 hora y horas completas por construcción). La no superposición entre reservas `confirmada` del mismo espacio y fecha se valida en el backend dentro de una transacción con bloqueo del espacio.
+- `notificaciones`: única por (`reserva_id`, `tipo`): un mismo recordatorio no puede enviarse dos veces. El token FCM del dispositivo se guarda en `usuarios.fcm_token`.
 - Cancelar una reserva cambia `estado` a `cancelada` (no se borra), de modo que queda en el historial y el horario se libera.

@@ -156,3 +156,19 @@ def guardar_fcm_token():
     g.usuario.fcm_token = _texto(datos, "token", 512)
     db.session.commit()
     return "", 204
+
+
+@bp.delete("/me/fcm-token")
+@con_perfil
+def borrar_fcm_token():
+    """Quita el token del dispositivo (al cerrar sesión), para no enviar avisos a un teléfono sin sesión.
+    ---
+    tags: [Usuarios]
+    security: [{Bearer: []}]
+    responses:
+      204: {description: Token eliminado}
+      401: {description: Sin token o token inválido, schema: {$ref: '#/definitions/Error'}}
+    """
+    g.usuario.fcm_token = None
+    db.session.commit()
+    return "", 204
