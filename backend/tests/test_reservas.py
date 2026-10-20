@@ -204,3 +204,33 @@ def test_swagger_disponible(client):
     assert r.status_code == 200
     rutas = r.json["paths"]
     assert "/api/v1/reservas" in rutas and "/api/v1/usuarios" in rutas
+
+
+# ---------- un usuario no puede tener dos reservas a la misma hora ----------
+def test_usuario_no_puede_reservar_dos_espacios_a_la_misma_hora(client, ana):
+    assert reservar(client, ana, espacio=1).status_code == 201
+    r = reservar(client, ana, espacio=2)  # otra cancha, mismo horario
+    assert r.status_code == 409 and codigo(r) == "RESERVA_SUPERPUESTA_USUARIO"
+
+
+def test_superposicion_parcial_del_mismo_usuario_tambien_se_rechaza(client, ana):
+    assert reservar(client, ana, espacio=1, ini="18:00", fin="20:00").status_code == 201
+    r = reservar(client, ana, espacio=2, ini="19:00", fin="21:00")
+    assert r.status_code == 409 and codigo(r) == "RESERVA_SUPERPUESTA_USUARIO"
+
+
+def test_mismo_usuario_puede_reservar_horarios_contiguos_o_en_otra_fecha(client, ana):
+    assert reservar(client, ana, espacio=1, ini="18:00", fin="19:00").status_code == 201
+    assert reservar(client, ana, espacio=2, ini="19:00", fin="20:00").status_code == 201
+    assert reservar(client, ana, espacio=2, fecha="2026-11-13", ini="18:00", fin="19:00").status_code == 201
+
+
+def test_otro_usuario_si_puede_reservar_otra_cancha_a_esa_hora(client, ana, beto):
+    assert reservar(client, ana, espacio=1).status_code == 201
+    assert reservar(client, beto, espacio=2).status_code == 201
+
+
+def test_cancelar_libera_al_usuario_para_reservar_otra_cancha(client, ana):
+    reserva_id = reservar(client, ana, espacio=1).json["id"]
+    assert client.delete(f"/api/v1/reservas/{reserva_id}", headers=ana).status_code == 200
+    assert reservar(client, ana, espacio=2).status_code == 201

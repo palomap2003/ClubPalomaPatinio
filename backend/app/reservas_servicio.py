@@ -6,7 +6,7 @@ from sqlalchemy import and_, or_
 
 from .errors import ApiError
 from .extensions import db
-from .models import ESTADO_CANCELADA, ESTADO_CONFIRMADA, Espacio, Reserva, utcnow
+from .models import ESTADO_CANCELADA, ESTADO_CONFIRMADA, Espacio, Reserva, Usuario, utcnow
 
 
 def obtener_espacio_reservable(espacio_id):
@@ -16,20 +16,20 @@ def obtener_espacio_reservable(espacio_id):
     return espacio
 
 
-def _hay_superposicion(espacio_id, fecha, hora_inicio, hora_fin):
-    """Dos rangos [a,b) y [c,d) se superponen si a < d y b > c. Rangos contiguos (19-20 y 20-21) NO se superponen."""
-    return (
-        db.session.query(Reserva.id)
-        .filter(
-            Reserva.espacio_id == espacio_id,
-            Reserva.fecha == fecha,
-            Reserva.estado == ESTADO_CONFIRMADA,
-            Reserva.hora_inicio < hora_fin,
-            Reserva.hora_fin > hora_inicio,
-        )
-        .first()
-        is not None
+def _hay_superposicion(fecha, hora_inicio, hora_fin, espacio_id=None, usuario_id=None):
+    """Dos rangos [a,b) y [c,d) se superponen si a < d y b > c. Rangos contiguos (19-20 y 20-21) NO se superponen.
+    Se filtra por espacio (otro usuario ya lo ocupa) o por usuario (ya tiene otra reserva en ese horario)."""
+    q = db.session.query(Reserva.id).filter(
+        Reserva.fecha == fecha,
+        Reserva.estado == ESTADO_CONFIRMADA,
+        Reserva.hora_inicio < hora_fin,
+        Reserva.hora_fin > hora_inicio,
     )
+    if espacio_id is not None:
+        q = q.filter(Reserva.espacio_id == espacio_id)
+    if usuario_id is not None:
+        q = q.filter(Reserva.usuario_id == usuario_id)
+    return q.first() is not None
 
 
 def _inicio_dt(fecha, hora):
@@ -74,9 +74,17 @@ def crear_reserva(usuario, espacio_id, fecha, hora_inicio, hora_fin, ahora):
 
     # Se bloquea la fila del espacio hasta el commit: dos reservas simultáneas sobre el mismo
     # espacio se procesan de a una, así la validación de superposición no puede "pisarse".
+    # También se bloquea la fila del usuario: dos pedidos simultáneos suyos sobre canchas distintas no se pisan.
+    db.session.query(Usuario).filter_by(id=usuario.id).with_for_update().first()
     db.session.query(Espacio).filter_by(id=espacio.id).with_for_update().first()
-    if _hay_superposicion(espacio.id, fecha, hora_inicio, hora_fin):
+    if _hay_superposicion(fecha, hora_inicio, hora_fin, espacio_id=espacio.id):
         raise ApiError(409, "HORARIO_NO_DISPONIBLE", "El horario seleccionado ya no está disponible. Elegí otro turno.")
+    if _hay_superposicion(fecha, hora_inicio, hora_fin, usuario_id=usuario.id):
+        raise ApiError(
+            409,
+            "RESERVA_SUPERPUESTA_USUARIO",
+            "Ya tenés una reserva en ese horario. No podés reservar dos espacios a la misma hora.",
+        )
 
     reserva = Reserva(
         usuario_id=usuario.id,
