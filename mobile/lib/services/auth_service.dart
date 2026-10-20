@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import 'api_client.dart';
+import 'notificaciones_service.dart';
 
 /// Acceso a Firebase Authentication. La contraseña vive solo en Firebase; nuestra base guarda el perfil.
 class AuthService {
@@ -87,5 +88,8 @@ class AuthService {
     }
   }
 
-  static Future<void> cerrarSesion() => FirebaseAuth.instance.signOut();
+  static Future<void> cerrarSesion() async {
+    await NotificacionesService.detener(); // antes del signOut: borrar el token requiere sesión
+    await FirebaseAuth.instance.signOut();
+  }
 }

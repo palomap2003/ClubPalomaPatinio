@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'screens/home_page.dart';
 import 'screens/login_page.dart';
 import 'services/auth_service.dart';
+import 'services/notificaciones_service.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
@@ -20,6 +21,8 @@ class ClubApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'ClubPalomaPatinio',
+        navigatorKey: navigatorKey,
+        scaffoldMessengerKey: messengerKey,
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
         home: const AuthGate(),

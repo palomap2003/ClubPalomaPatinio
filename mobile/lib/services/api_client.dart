@@ -117,6 +117,8 @@ class ApiClient {
 
   Future<void> guardarFcmToken(String token) => _enviar('PUT', '/api/v1/usuarios/me/fcm-token', body: {'token': token});
 
+  Future<void> borrarFcmToken() => _enviar('DELETE', '/api/v1/usuarios/me/fcm-token');
+
   // ---- Catálogo ----
   Future<List<Sede>> sedes() async => _lista(await _enviar('GET', '/api/v1/sedes'), Sede.fromJson);
 
@@ -156,6 +158,8 @@ class ApiClient {
         await _enviar('GET', '/api/v1/reservas/mis-reservas', query: {'tipo': historial ? 'historial' : 'proximas'}),
         Reserva.fromJson,
       );
+
+  Future<Reserva> reserva(int id) async => Reserva.fromJson(await _enviar('GET', '/api/v1/reservas/$id'));
 
   Future<Reserva> cancelarReserva(int id) async => Reserva.fromJson(await _enviar('DELETE', '/api/v1/reservas/$id'));
 }

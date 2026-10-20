@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
+import '../services/notificaciones_service.dart';
 import '../widgets.dart';
 import 'inicio_page.dart';
 import 'mis_reservas_page.dart';
@@ -32,7 +33,11 @@ class _HomePageState extends State<HomePage> {
     setState(() => _error = null);
     try {
       final u = await api.perfil();
-      if (mounted) setState(() => _usuario = u);
+      if (mounted) {
+        setState(() => _usuario = u);
+        // Ya hay sesión y perfil: se piden permisos y se registra el teléfono para los recordatorios.
+        WidgetsBinding.instance.addPostFrameCallback((_) => NotificacionesService.iniciar());
+      }
     } catch (e) {
       if (mounted) setState(() => _error = e);
     }
