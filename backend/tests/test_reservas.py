@@ -234,3 +234,21 @@ def test_cancelar_libera_al_usuario_para_reservar_otra_cancha(client, ana):
     reserva_id = reservar(client, ana, espacio=1).json["id"]
     assert client.delete(f"/api/v1/reservas/{reserva_id}", headers=ana).status_code == 200
     assert reservar(client, ana, espacio=2).status_code == 201
+
+
+# ---------- la grilla también tacha lo que el propio usuario ya tiene reservado en otra cancha ----------
+def test_disponibilidad_tacha_horarios_donde_el_usuario_ya_reservo_otra_cancha(client, ana, beto):
+    assert reservar(client, ana, espacio=1, ini="18:00", fin="19:00").status_code == 201
+
+    de_ana = franjas(client, ana, espacio=2)
+    assert de_ana["18:00"] is False  # ya tiene otra reserva a esa hora
+    assert de_ana["17:00"] is True and de_ana["19:00"] is True
+
+    de_beto = franjas(client, beto, espacio=2)
+    assert de_beto["18:00"] is True  # para otro usuario esa cancha sigue libre
+
+
+def test_disponibilidad_con_duracion_2_tacha_los_inicios_que_se_pisan_con_reserva_propia(client, ana):
+    assert reservar(client, ana, espacio=1, ini="18:00", fin="19:00").status_code == 201
+    f = franjas(client, ana, duracion=2, espacio=2)
+    assert f["17:00"] is False and f["18:00"] is False and f["16:00"] is True and f["19:00"] is True

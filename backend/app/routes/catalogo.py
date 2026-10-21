@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, current_app, g, jsonify, request
 
 from ..auth import con_perfil
 from ..errors import ApiError
@@ -110,7 +110,7 @@ def ver_espacio(espacio_id):
 @con_perfil
 def disponibilidad(espacio_id):
     """Franjas horarias de un espacio para una fecha, dentro del horario de la sede.
-    Cada franja indica si está disponible (libre y futura).
+    Cada franja indica si está disponible: libre, futura y sin otra reserva del usuario que se superponga.
     ---
     tags: [Espacios deportivos]
     security: [{Bearer: []}]
@@ -129,7 +129,7 @@ def disponibilidad(espacio_id):
     if not duracion.isdigit() or int(duracion) < 1:
         raise ApiError(400, "DURACION_INVALIDA", "La duración debe ser un número entero de horas (mínimo 1).")
     ahora = current_app.config["CLOCK"]()
-    slots = calcular_slots(espacio, fecha, int(duracion), ahora)
+    slots = calcular_slots(espacio, fecha, int(duracion), ahora, g.usuario)
     return jsonify(
         [
             {"hora_inicio": int_a_hora(s["inicio"]), "hora_fin": int_a_hora(s["fin"]), "disponible": s["disponible"]}

@@ -36,22 +36,19 @@ def _inicio_dt(fecha, hora):
     return datetime.combine(fecha, time.min) + timedelta(hours=hora)
 
 
-def calcular_slots(espacio, fecha, duracion, ahora):
-    """Franjas de inicio posibles dentro del horario de la sede, indicando si están libres y son futuras."""
+def calcular_slots(espacio, fecha, duracion, ahora, usuario=None):
+    """Franjas de inicio posibles dentro del horario de la sede. Una franja no está disponible si el espacio ya
+    está ocupado, si ya pasó o si el usuario ya tiene otra reserva (en cualquier espacio) que se superpone."""
     sede = espacio.sede
-    ocupadas = (
-        db.session.query(Reserva.hora_inicio, Reserva.hora_fin)
-        .filter(
-            Reserva.espacio_id == espacio.id,
-            Reserva.fecha == fecha,
-            Reserva.estado == ESTADO_CONFIRMADA,
-        )
-        .all()
+    consulta = db.session.query(Reserva.hora_inicio, Reserva.hora_fin).filter(
+        Reserva.fecha == fecha, Reserva.estado == ESTADO_CONFIRMADA
     )
+    ocupadas = consulta.filter(Reserva.espacio_id == espacio.id).all()
+    propias = consulta.filter(Reserva.usuario_id == usuario.id).all() if usuario is not None else []
     slots = []
     for inicio in range(sede.hora_apertura, sede.hora_cierre - duracion + 1):
         fin = inicio + duracion
-        libre = all(not (inicio < o_fin and fin > o_ini) for o_ini, o_fin in ocupadas)
+        libre = all(not (inicio < o_fin and fin > o_ini) for o_ini, o_fin in ocupadas + propias)
         futura = _inicio_dt(fecha, inicio) > ahora
         slots.append({"inicio": inicio, "fin": fin, "disponible": libre and futura})
     return slots
