@@ -88,7 +88,7 @@ erDiagram
 
 - `usuarios`: `firebase_uid`, `email` y `dni` únicos.
 - `sedes`: `0 <= hora_apertura < hora_cierre <= 24`.
-- `espacios`: único por (`sede_id`, `tipo_espacio_id`, `numero`) y `nombre` único. El nombre se genera automáticamente, p. ej. `Moron_Rivadavia_Futbol_F5_1`.
+- `espacios`: único por (`sede_id`, `tipo_espacio_id`, `numero`) y `nombre` único. El nombre se genera automáticamente con el formato del enunciado, `Sede_Calle_Altura_Tipo_Número`, p. ej. `Moron_Rivadavia_19850_Paddle_1` o `Moron_Rivadavia_19850_Futbol5_1`.
 - `reservas`: `0 <= hora_inicio < hora_fin <= 24` (duración mínima de 1 hora y horas completas por construcción). La no superposición entre reservas `confirmada` del mismo espacio y fecha se valida en el backend dentro de una transacción con bloqueo del espacio.
 - `notificaciones`: única por (`reserva_id`, `tipo`): un mismo recordatorio no puede enviarse dos veces. El token FCM del dispositivo se guarda en `usuarios.fcm_token`.
 - Cancelar una reserva cambia `estado` a `cancelada` (no se borra), de modo que queda en el historial y el horario se libera.

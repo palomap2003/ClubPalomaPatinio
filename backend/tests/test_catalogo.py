@@ -24,9 +24,9 @@ def test_sede_inexistente(client, ana):
 def test_nombre_compuesto_del_espacio(client, ana):
     espacios = client.get("/api/v1/espacios", headers=ana).json
     nombres = {e["nombre"] for e in espacios}
-    assert "Moron_Rivadavia_Futbol_F5_1" in nombres
-    assert "Moron_Rivadavia_Futbol_F5_2" in nombres
-    assert "RamosMejia_Belgrano_Hockey_H7_1" in nombres
+    assert "Moron_Rivadavia_19850_Futbol5_1" in nombres
+    assert "Moron_Rivadavia_19850_Futbol5_2" in nombres
+    assert "RamosMejia_Belgrano_1240_Hockey7_1" in nombres
 
 
 def test_listar_espacios_indica_sede(client, ana):
@@ -57,3 +57,10 @@ def test_filtro_invalido(client, ana):
 def test_deportes_incluyen_sus_tipos(client, ana):
     futbol = next(d for d in client.get("/api/v1/deportes", headers=ana).json if d["nombre"] == "Fútbol")
     assert {t["codigo"] for t in futbol["tipos"]} == {"F5", "F7", "F8", "F11"}
+
+
+def test_nombres_siguen_el_formato_del_enunciado(client, ana):
+    """Sede_Calle_Altura_Tipo_Numero, como Moron_Rivadavia_19850_Paddle_1."""
+    nombres = {e["nombre"] for e in client.get("/api/v1/espacios", headers=ana).json}
+    assert "Moron_Rivadavia_19850_Paddle_1" in nombres
+    assert len(nombres) == 22  # todos distintos

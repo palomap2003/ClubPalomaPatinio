@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-ESPACIO = 1  # Moron_Rivadavia_Futbol_F5_1 (sede Morón: 08:00 a 23:00, $3.800/h)
+ESPACIO = 1  # Moron_Rivadavia_19850_Futbol5_1 (sede Morón: 08:00 a 23:00, $3.800/h)
 FECHA = "2026-11-12"  # el reloj de los tests está en 2026-11-10 12:00
 
 
@@ -25,7 +25,7 @@ def test_reserva_exitosa_calcula_precio_total(client, ana):
     assert r.json["estado"] == "confirmada"
     assert r.json["precio_total"] == 7600
     assert r.json["sede"]["nombre"] == "Morón"
-    assert r.json["espacio"]["nombre"] == "Moron_Rivadavia_Futbol_F5_1"
+    assert r.json["espacio"]["nombre"] == "Moron_Rivadavia_19850_Futbol5_1"
     assert r.json["puede_cancelar"] is True
 
 

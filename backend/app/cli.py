@@ -2,6 +2,7 @@ import click
 from sqlalchemy import inspect, text
 
 from .extensions import db
+from .models import Espacio, generar_nombre_espacio
 from .seed import cargar_datos_ejemplo
 
 
@@ -15,6 +16,16 @@ def registrar_comandos(app):
             db.session.execute(text("ALTER TABLE reservas DROP COLUMN recordatorio_enviado"))
             db.session.commit()
             click.echo("Columna reservas.recordatorio_enviado eliminada.")
+        # Los nombres de espacios siguen el formato del enunciado (Sede_Calle_Altura_Tipo_Numero).
+        renombrados = 0
+        for espacio in db.session.query(Espacio).all():
+            nombre = generar_nombre_espacio(espacio.sede, espacio.tipo, espacio.numero)
+            if espacio.nombre != nombre:
+                espacio.nombre = nombre
+                renombrados += 1
+        db.session.commit()
+        if renombrados:
+            click.echo(f"{renombrados} espacios renombrados al formato del enunciado.")
         click.echo("Tablas creadas / verificadas.")
 
     @app.cli.command("seed")

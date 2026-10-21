@@ -98,5 +98,6 @@ curl -X POST "$URL/api/v1/notificaciones/recordatorios" -H "X-Cron-Secret: $CRON
 - **Horas como enteros:** `hora_inicio`/`hora_fin` se guardan como hora completa (0–24); "minuto 00" queda garantizado por el tipo de dato y la API rechaza cualquier otro minuto.
 - **Superposición:** dos rangos `[a,b)` y `[c,d)` chocan si `a < d` y `b > c`; 19–20 y 20–21 no chocan. Antes de validar se bloquea la fila del espacio (`SELECT … FOR UPDATE`) para que dos reservas simultáneas no se pisen.
 - **Un usuario, una reserva por horario:** no puede tener dos reservas confirmadas que se superpongan, aunque sean en canchas distintas (409 `RESERVA_SUPERPUESTA_USUARIO`). Se bloquean las filas del usuario y del espacio durante la validación, así dos pedidos simultáneos tampoco se pisan.
+- **Nombre de los espacios:** se genera como pide el enunciado, `Sede_Calle_Altura_Tipo_Número` (ej. `Moron_Rivadavia_19850_Paddle_1`). El tipo distingue las variantes de un deporte (`Futbol5`, `Futbol7`, `TenisPolvo`...). `init-db` renombra los espacios existentes si el formato cambia.
 - **Cancelación lógica:** la reserva queda `cancelada` (se ve en el historial) y el horario se libera porque la validación solo mira las `confirmada`.
 - **Zona horaria:** "horario futuro" se evalúa en hora de Argentina (Render corre en UTC).

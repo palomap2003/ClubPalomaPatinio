@@ -66,7 +66,7 @@ SWAGGER_TEMPLATE = {
             "type": "object",
             "properties": {
                 "id": {"type": "integer"},
-                "nombre": {"type": "string", "example": "Moron_Rivadavia_Futbol_F5_1"},
+                "nombre": {"type": "string", "example": "Moron_Rivadavia_19850_Futbol5_1"},
                 "numero": {"type": "integer"},
                 "deporte": {"type": "string", "example": "Fútbol"},
                 "tipo": {"type": "object"},

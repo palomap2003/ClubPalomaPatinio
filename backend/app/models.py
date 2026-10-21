@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, time, timedelta, timezone
 
 from .extensions import db
@@ -97,10 +98,20 @@ class Espacio(db.Model):
     reservas = db.relationship("Reserva", back_populates="espacio")
 
 
+def etiqueta_tipo(tipo):
+    """Tipo de espacio legible y único para el nombre: Futbol5, Futbol7, TenisPolvo, Paddle, Basquet..."""
+    deporte, codigo = slug(tipo.deporte.nombre), slug(tipo.codigo)
+    if codigo == deporte:
+        return deporte
+    if re.fullmatch(r"[A-Z]\d+", codigo):  # F5 -> 5, H11 -> 11
+        codigo = codigo[1:]
+    return deporte + codigo
+
+
 def generar_nombre_espacio(sede, tipo, numero):
-    """Ej.: Moron_Rivadavia_Futbol_F5_1  (sede, calle, deporte, tipo, número)."""
+    """Ej.: Moron_Rivadavia_19850_Futbol5_1 (sede, calle, altura, tipo de espacio, número), como pide el enunciado."""
     calle = " ".join(p for p in sede.calle.split() if p.lower().strip(".") not in ("av", "avenida", "calle"))
-    return "_".join([slug(sede.nombre), slug(calle), slug(tipo.deporte.nombre), slug(tipo.codigo), str(numero)])
+    return "_".join([slug(sede.nombre), slug(calle), slug(sede.altura), etiqueta_tipo(tipo), str(numero)])
 
 
 class Reserva(db.Model):

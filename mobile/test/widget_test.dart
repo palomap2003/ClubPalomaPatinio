@@ -21,7 +21,7 @@ void main() {
       'hora_fin': '19:00',
       'precio_total': 3800.0,
       'puede_cancelar': true,
-      'espacio': {'id': 1, 'nombre': 'Moron_Rivadavia_Futbol_F5_1', 'deporte': 'Fútbol', 'tipo': 'Fútbol 5'},
+      'espacio': {'id': 1, 'nombre': 'Moron_Rivadavia_19850_Futbol5_1', 'deporte': 'Fútbol', 'tipo': 'Fútbol 5'},
       'sede': {'id': 1, 'nombre': 'Morón', 'direccion': 'Av. Rivadavia 19850'},
     });
     expect(r.sedeNombre, 'Morón');

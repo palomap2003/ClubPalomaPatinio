@@ -43,7 +43,7 @@ def test_envia_recordatorio_24h(client, ana, push, reloj):
     envio = push.enviados[0]
     assert envio["token"] == "tok-ana"
     assert envio["titulo"] == "Tenés una reserva mañana"
-    assert "Moron_Rivadavia_Futbol_F5_1" in envio["cuerpo"] and "13:00 a 14:00" in envio["cuerpo"]
+    assert "Moron_Rivadavia_19850_Futbol5_1" in envio["cuerpo"] and "13:00 a 14:00" in envio["cuerpo"]
     assert envio["data"] == {"reserva_id": reserva_id, "tipo": "recordatorio_24h"}
     assert envio["ttl"] == 23 * 3600  # el TTL es el tiempo que falta para la reserva
 
