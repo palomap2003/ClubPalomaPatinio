@@ -51,10 +51,13 @@ class _LoginPageState extends State<LoginPage> {
               child: Form(
                 key: _form,
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Text('CLUB ', style: titulo(40)),
-                    Text('PATINIO', style: titulo(40).copyWith(color: kNeon)),
-                  ]),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Text('CLUB ', style: titulo(40)),
+                      Text('PALOMA PATINIO', style: titulo(40).copyWith(color: kNeon)),
+                    ]),
+                  ),
                   const SizedBox(height: 4),
                   Text('Reservá tu espacio deportivo',
                       textAlign: TextAlign.center, style: TextStyle(color: blanco(0.6))),

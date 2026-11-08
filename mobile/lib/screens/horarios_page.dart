@@ -14,7 +14,7 @@ class HorariosPage extends StatefulWidget {
 }
 
 class _HorariosPageState extends State<HorariosPage> {
-  late final DateTime _hoy = DateUtils.dateOnly(DateTime.now());
+  late final DateTime _hoy = hoyArgentina();
   late DateTime _fecha = _hoy;
   int _duracion = 1;
   Franja? _seleccion;

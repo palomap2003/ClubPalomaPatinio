@@ -1,3 +1,10 @@
+/// "Hoy" en Argentina (UTC-3, sin horario de verano), sin depender de la zona horaria del dispositivo:
+/// el backend valida y envía los recordatorios con la hora de Argentina.
+DateTime hoyArgentina() {
+  final a = DateTime.now().toUtc().subtract(const Duration(hours: 3));
+  return DateTime(a.year, a.month, a.day);
+}
+
 String fechaIso(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 

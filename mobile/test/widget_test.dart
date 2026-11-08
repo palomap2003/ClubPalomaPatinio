@@ -6,6 +6,11 @@ void main() {
     expect(fechaIso(DateTime(2026, 3, 5)), '2026-03-05');
   });
 
+  test('"hoy" se calcula en hora de Argentina (UTC-3) y no cambia con la zona del dispositivo', () {
+    final a = DateTime.now().toUtc().subtract(const Duration(hours: 3));
+    expect(hoyArgentina(), DateTime(a.year, a.month, a.day));
+  });
+
   test('formatea importes con separador de miles', () {
     expect(dinero(3800), r'$3.800');
     expect(dinero(1234567), r'$1.234.567');
